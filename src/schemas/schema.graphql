@@ -1,0 +1,157 @@
+# type User {
+#   email: String!
+#   id: ID!
+#   name: String
+#   posts: [Post!]!
+# }
+
+# type Post {
+#   author: User
+#   content: String
+#   id: ID!
+#   published: Boolean!
+#   title: String!
+# }
+scalar DateTime
+scalar Date
+
+enum Role {
+  A
+  T
+  S
+}
+enum Gender {
+  "Male"
+  M
+  "Female"
+  F
+  "Trans"
+  T
+  "Secret"
+  S
+}
+
+type User {
+  id: ID!
+  "暱稱"
+  nickname: String!
+  email: String!
+  lastName: String
+  firstName: String
+  gender: Gender
+  role: Role
+  password: String!
+  website: String
+  notified: Boolean
+  birthday: DateTime
+  photo: String
+  activated: Boolean
+  activatedToken: String
+  passwordResetToken: String
+  passwordResetExpires: DateTime
+  passwordChangedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+  facebookId: String
+  googleId: String
+}
+
+type UserResult {
+  nickname: String
+  email: String
+  lastName: String
+  firstName: String
+  gender: Gender
+  role: Role
+  website: String
+  birthday: DateTime
+  photo: String
+  activated: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Query {
+  currentUser: UserResult
+  user(where: UserWhereUniqueInput!): UserResult
+  users(where: UserWhereInput!): [UserResult]
+  signIn(email: String!, password: String!): UserResult
+}
+
+type Mutation {
+  signUp(data: UserCreateInput!): Boolean
+  signOut: Boolean
+  updateCurrentUser(data: UserModifyInput): UserResult
+  forgotPassword(email: String): Boolean
+  resetPassword(token: String!, email: String!, password: String!): Boolean
+}
+
+input UserCreateInput {
+  nickname: String!
+  email: String!
+  lastName: String
+  firstName: String
+  gender: Gender
+  role: Role
+  password: String!
+  birthday: DateTime
+  photo: String
+}
+
+input UserModifyInput {
+  nickname: String
+  gender: Gender
+  role: Role
+  website: String
+  birthday: DateTime
+  photo: String
+}
+
+input UserWhereUniqueInput {
+  id: ID
+}
+
+input UserWhereInput {
+  nickname: String
+  email: String
+  lastName: String
+  firstName: String
+  gender: Gender
+  role: Role
+}
+
+# type Query {
+#   feed: [Post!]!
+#   filterPosts(searchString: String): [Post!]!
+#   post(where: PostWhereUniqueInput!): Post
+# }
+
+# type Mutation {
+#   createDraft(authorEmail: String, content: String, title: String!): Post!
+#   deleteOnePost(where: PostWhereUniqueInput!): Post
+#   publish(id: ID): Post
+#   signupUser(data: UserCreateInput!): User!
+# }
+
+# input PostWhereUniqueInput {
+#   id: ID
+# }
+
+# input UserCreateInput {
+#   email: String!
+#   id: ID
+#   name: String
+#   posts: PostCreateManyWithoutPostsInput
+# }
+
+# input PostCreateManyWithoutPostsInput {
+#   connect: [PostWhereUniqueInput!]
+#   create: [PostCreateWithoutAuthorInput!]
+# }
+
+# input PostCreateWithoutAuthorInput {
+#   content: String
+#   id: ID
+#   published: Boolean
+#   title: String!
+# }

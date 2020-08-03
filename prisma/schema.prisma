@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource mysql {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int       @default(autoincrement()) @id
+  email                String    @unique
+  firstName            String
+  lastName             String
+  nickname             String
+  gender               String?
+  role                 String?
+  password             String
+  website              String?
+  notified             Boolean?
+  birthday             DateTime?
+  photo                String?
+  activated            Boolean?
+  activatedToken       String?   @map(name: "activated_token")
+  passwordResetToken   String?   @map(name: "password_reset_token")
+  passwordResetExpires DateTime? @map(name: "password_reset_expires")
+  passwordChangedAt    DateTime? @map(name: "password_changed_at")
+  createdAt            DateTime  @map(name: "created_at") @default(now())
+  updatedAt            DateTime  @map(name: "updated_at") @updatedAt
+  facebookId           String?   @map(name: "facebook_id") @unique
+  googleId             String?   @map(name: "google_id") @unique
+  @@map(name: "users")
+}

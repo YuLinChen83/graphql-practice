@@ -1,66 +1,70 @@
-# type User {
-#   email: String!
-#   id: ID!
-#   name: String
-#   posts: [Post!]!
-# }
-
-# type Post {
-#   author: User
-#   content: String
-#   id: ID!
-#   published: Boolean!
-#   title: String!
-# }
+##################### Common 共用 ###################
 scalar DateTime
 scalar Date
 
-enum Role {
-  A
-  T
-  S
-}
 enum Gender {
   "Male"
   M
   "Female"
   F
-  "Trans"
+  "TRANSGENDER"
   T
-  "Secret"
-  S
 }
 
-type User {
-  id: ID!
-  "暱稱"
-  nickname: String!
+enum Role {
+  SUPERADMIN
+  ADMIN
+  TEACHER
+  USER
+}
+
+enum Sort {
+  asc
+  desc
+}
+
+"""
+共用表格filter保留字參數
+"""
+input TableStringFilterInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+}
+
+##################### User 使用者 ###################
+"""
+建立使用者參數
+"""
+input UserCreateInput {
+  nickName: String!
   email: String!
-  lastName: String
-  firstName: String
+  lastName: String!
+  firstName: String!
   gender: Gender
   role: Role
   password: String!
-  website: String
-  notified: Boolean
   birthday: DateTime
   photo: String
-  activated: Boolean
-  activatedToken: String
-  passwordResetToken: String
-  passwordResetExpires: DateTime
-  passwordChangedAt: DateTime
-  createdAt: DateTime
-  updatedAt: DateTime
-  facebookId: String
-  googleId: String
+  facebookID: String
+  googleID: String
 }
 
-type UserResult {
-  nickname: String
+"""
+使用者欄位
+"""
+type User {
   email: String
   lastName: String
   firstName: String
+  nickName: String
   gender: Gender
   role: Role
   website: String
@@ -69,89 +73,147 @@ type UserResult {
   activated: Boolean
   createdAt: DateTime
   updatedAt: DateTime
+  comments: [CourseComment!]!
+  courses: [Course!]!
 }
 
+"""
+篩選User參數
+"""
+input UserFilterKey {
+  nickName: TableStringFilterInput
+  email: TableStringFilterInput
+  lastName: TableStringFilterInput
+  firstName: TableStringFilterInput
+  gender: TableStringFilterInput
+  role: TableStringFilterInput
+  birthday: TableStringFilterInput
+}
+
+"""
+排序User參數
+"""
+input UserOrderByInput {
+  email: Sort
+  firstName: Sort
+  birthday: Sort
+  createdAt: Sort
+  updatedAt: Sort
+}
+
+##################### Course 課程 ###################
+"""
+建立課程主檔參數
+"""
+input CourseCreateInput {
+  title: String!
+  content: String!
+  vedioUrl: String
+  teachers: [User!]
+  remark: String
+  price: Int
+  specialPrice: Int
+}
+
+"""
+課程主檔欄位
+"""
+type Course {
+  id: ID
+  title: String
+  content: String
+  teachers: [User!]
+  remark: String
+  price: Int
+  specialPrice: Int
+}
+
+"""
+建立系統化課程參數
+"""
+input SystematicCourseCreateInput {
+  courseId: Int!
+  chapter: Int!
+  unit: Int!
+  title: String
+  content: String
+  vedioUrl: String
+  remark: String
+  updatedAt: DateTime
+}
+
+"""
+系統化課程欄位
+"""
+type SystematicCourse {
+  chapter: Int
+  unit: Int
+  title: String
+  content: String
+  vedioUrl: String
+  remark: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  course: Course
+}
+
+"""
+一對一課程欄位
+"""
+type OneToOneCourse {
+  id: ID
+  title: String
+  content: String
+  teachers: [User!]
+  reservations: [OneToOneCourseReservation!]
+}
+
+"""
+一對一課程學生預約紀錄
+"""
+type OneToOneCourseReservation {
+  id: ID
+  user: User
+  startTime: DateTime
+  endTime: DateTime
+}
+
+"""
+課程公共討論留言
+"""
+type CourseComment {
+  id: ID
+  author: User
+  content: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  course: Course
+}
+
+"""
+課程討論區回覆
+"""
+type CourseCommentReply {
+  id: ID
+  author: User
+  title: String!
+  content: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  course: Course
+}
+
+##################### Root Object ###################
+
 type Query {
-  currentUser: UserResult
-  user(where: UserWhereUniqueInput!): UserResult
-  users(where: UserWhereInput!): [UserResult]
-  signIn(email: String!, password: String!): UserResult
+  currentUser: User
+  users(filter: UserFilterKey, skip: Int, take: Int, orderBy: UserOrderByInput): [User!]
+  signIn(email: String!, password: String!): Boolean
+  # course(name: String): Course
 }
 
 type Mutation {
-  signUp(data: UserCreateInput!): Boolean
-  signOut: Boolean
-  updateCurrentUser(data: UserModifyInput): UserResult
-  forgotPassword(email: String): Boolean
-  resetPassword(token: String!, email: String!, password: String!): Boolean
+  signUp(data: UserCreateInput!): User
+  createCourse(data: CourseCreateInput!): Course
+  createSystematicCourse(data: SystematicCourseCreateInput!): SystematicCourse
 }
-
-input UserCreateInput {
-  nickname: String!
-  email: String!
-  lastName: String
-  firstName: String
-  gender: Gender
-  role: Role
-  password: String!
-  birthday: DateTime
-  photo: String
-}
-
-input UserModifyInput {
-  nickname: String
-  gender: Gender
-  role: Role
-  website: String
-  birthday: DateTime
-  photo: String
-}
-
-input UserWhereUniqueInput {
-  id: ID
-}
-
-input UserWhereInput {
-  nickname: String
-  email: String
-  lastName: String
-  firstName: String
-  gender: Gender
-  role: Role
-}
-
-# type Query {
-#   feed: [Post!]!
-#   filterPosts(searchString: String): [Post!]!
-#   post(where: PostWhereUniqueInput!): Post
-# }
-
-# type Mutation {
-#   createDraft(authorEmail: String, content: String, title: String!): Post!
-#   deleteOnePost(where: PostWhereUniqueInput!): Post
-#   publish(id: ID): Post
-#   signupUser(data: UserCreateInput!): User!
-# }
-
-# input PostWhereUniqueInput {
-#   id: ID
-# }
-
-# input UserCreateInput {
-#   email: String!
-#   id: ID
-#   name: String
-#   posts: PostCreateManyWithoutPostsInput
-# }
-
-# input PostCreateManyWithoutPostsInput {
-#   connect: [PostWhereUniqueInput!]
-#   create: [PostCreateWithoutAuthorInput!]
-# }
-
-# input PostCreateWithoutAuthorInput {
-#   content: String
-#   id: ID
-#   published: Boolean
-#   title: String!
-# }

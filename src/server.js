@@ -18,5 +18,5 @@ const serverOptions = {
 };
 server.express.use(cookieParser());
 server.start(serverOptions, postStart => {
-  console.log(`🚀 Server ready at: http://localhost:${postStart.port}\n⭐️ See sample queries: http://pris.ly/e/js/graphql-sdl-first#using-the-graphql-api`);
+  console.log(`🚀 Server ready at: http://localhost:${postStart.port}`);
 });

@@ -1,0 +1,49 @@
+interface User {
+  Image
+  [ProductVariant]
+}
+
+type SuperAdmin implements User {
+
+}
+
+type Admin implements User {
+
+}
+
+type Teacher implements User {
+
+}
+
+type Student implements User {
+
+}
+
+interface Course {
+  Teacher
+}
+
+type OnlineCourse {
+
+}
+
+type Order {
+  User
+  Course
+}
+
+type OneToOneCourse {
+  
+}
+
+type Reservation {
+
+}
+
+type Payment {
+
+}
+
+type Coupon {
+
+}

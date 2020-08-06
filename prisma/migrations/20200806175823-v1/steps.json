@@ -364,7 +364,14 @@
     {
       "tag": "CreateField",
       "model": "User",
-      "field": "purchaseCourseIds",
+      "field": "courseIds",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "User",
+      "field": "orderIds",
       "type": "String",
       "arity": "Optional"
     },
@@ -487,6 +494,269 @@
     },
     {
       "tag": "CreateModel",
+      "model": "Order"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "id",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "id"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "id"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "autoincrement()"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "id"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "courseId",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "course",
+      "type": "Course",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "course"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "course"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[courseId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "course"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "userId",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "user",
+      "type": "User",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "user"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "user"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[userId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "user"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "purchaseTime",
+      "type": "DateTime",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "purchaseTime"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "purchaseTime"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "now()"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "status",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "status"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "status"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "\"待付款\""
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "salesAttributedTo",
+      "type": "Int",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "paymentType",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "paymentType"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Order",
+          "field": "paymentType"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "\"Paypel\""
+    },
+    {
+      "tag": "CreateField",
+      "model": "Order",
+      "field": "remark",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateModel",
       "model": "LearningHistory"
     },
     {
@@ -599,7 +869,7 @@
       "tag": "CreateField",
       "model": "LearningHistory",
       "field": "time",
-      "type": "String",
+      "type": "Int",
       "arity": "Required"
     },
     {
@@ -607,6 +877,13 @@
       "model": "LearningHistory",
       "field": "note",
       "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "LearningHistory",
+      "field": "isComplete",
+      "type": "Boolean",
       "arity": "Required"
     },
     {
@@ -682,6 +959,38 @@
     {
       "tag": "CreateField",
       "model": "Course",
+      "field": "typeCode",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "typeCode"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Course",
+          "field": "typeCode"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "\"SYS\""
+    },
+    {
+      "tag": "CreateField",
+      "model": "Course",
       "field": "title",
       "type": "String",
       "arity": "Required"
@@ -734,6 +1043,159 @@
       "field": "publishTime",
       "type": "DateTime",
       "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Course",
+      "field": "teacherIds",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateModel",
+      "model": "CourseAnnoucement"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CourseAnnoucement",
+      "field": "id",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "id"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "id"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "autoincrement()"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "id"
+        },
+        "directive": "id"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "CourseAnnoucement",
+      "field": "courseId",
+      "type": "Int",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CourseAnnoucement",
+      "field": "course",
+      "type": "Course",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "course"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "course"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[courseId]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "course"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CourseAnnoucement",
+      "field": "title",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CourseAnnoucement",
+      "field": "content",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "CourseAnnoucement",
+      "field": "createdAt",
+      "type": "DateTime",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "createdAt"
+        },
+        "directive": "default"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "CourseAnnoucement",
+          "field": "createdAt"
+        },
+        "directive": "default"
+      },
+      "argument": "",
+      "value": "now()"
     },
     {
       "tag": "CreateModel",
@@ -795,23 +1257,37 @@
     {
       "tag": "CreateField",
       "model": "SystematicCourse",
-      "field": "chapterName",
+      "field": "typeName",
       "type": "String",
       "arity": "Required"
     },
     {
       "tag": "CreateField",
       "model": "SystematicCourse",
-      "field": "unitName",
+      "field": "chapterUnit",
       "type": "String",
       "arity": "Required"
     },
     {
       "tag": "CreateField",
       "model": "SystematicCourse",
-      "field": "unitContent",
+      "field": "title",
       "type": "String",
       "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "SystematicCourse",
+      "field": "content",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateField",
+      "model": "SystematicCourse",
+      "field": "attachmentUrl",
+      "type": "String",
+      "arity": "Optional"
     },
     {
       "tag": "CreateField",
@@ -898,7 +1374,7 @@
         "directive": "id"
       },
       "argument": "",
-      "value": "[courseId, chapterName, unitName]"
+      "value": "[courseId, chapterUnit]"
     },
     {
       "tag": "CreateModel",

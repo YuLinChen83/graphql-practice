@@ -7,18 +7,21 @@ datasource mysql {
   url = "***"
 }
 
+// 定義角色&其擁有權限
 model Role {
   id             Int              @default(autoincrement()) @id
   name           String           @unique   //SUPERADMIN, ADMIN(TEACHER), USER(STUDENT)
   permissionIds  String?          //權限：以,分割permissionId
 }
 
+// 定義行為操作權限
 model Permission {
   id             Int              @default(autoincrement()) @id
   name           String           @unique
   remark         String?
 }
 
+// 使用者(roleId區分SuperAdmin/Teacher/Student)
 model User {
   id             Int              @default(autoincrement()) @id
   email          String           @unique
@@ -32,7 +35,8 @@ model User {
   photo          String?
   gender         Gender?
   password       String
-  purchaseCourseIds String?         //購買課程：以,分割courseId
+  courseIds      String?         //購買課程：以,分割courseId
+  orderIds       String?         //訂單記錄：以,分割orderIds
   createdAt      DateTime         @default(now())
   updatedAt      DateTime?        @updatedAt
   facebookId     String?
@@ -41,19 +45,37 @@ model User {
   role           Role             @relation(fields: [roleId], references: [id])
 }
 
+// 所有訂單列表(後台為主)
+model Order {
+  id             Int              @default(autoincrement()) @id
+  courseId       Int
+  course         Course           @relation(fields: [courseId], references: [id])
+  userId         Int
+  user           User             @relation(fields: [userId], references: [id])
+  purchaseTime   DateTime         @default(now())
+  status         String           @default("待付款")  //待確認,待發貨,待收貨,已取消,已退款
+  salesAttributedTo Int?    //業績歸屬?(可以認領)
+  paymentType    String           @default("Paypel") //
+  remark         String?
+}
+
+// 學習紀錄
 model LearningHistory {
   userId         Int
   user           User             @relation(fields: [userId], references: [id])
   courseId       Int
   course         Course           @relation(fields: [courseId], references: [id])
-  time           String   //已觀看時間
+  time           Int      //已觀看時間
   note           String   //重點筆記
+  isComplete     Boolean  //是否完成
 
   @@id([userId, courseId])
 }
 
+// 課程總檔
 model Course {
   id             Int              @default(autoincrement()) @id
+  typeCode       String           @default("SYS") //SYS:系統化, OTO: 一對一, OL:線上(後台收入類型用)
   title          String
   content        String
   price          Int
@@ -62,22 +84,37 @@ model Course {
   totalTime      Int?   //系統化課程總時間
   remark         String?
   publishTime    DateTime?
+  teacherIds     String?    //多老師則,分隔userId
 }
 
+// 課程公告
+model CourseAnnoucement {
+  id             Int              @default(autoincrement()) @id
+  courseId       Int
+  course         Course           @relation(fields: [courseId], references: [id])
+  title          String
+  content        String?
+  createdAt      DateTime         @default(now())
+}
+
+// 系統化課程
 model SystematicCourse {
   courseId       Int
   course         Course           @relation(fields: [courseId], references: [id])
-  chapterName    String
-  unitName       String
-  unitContent    String
+  typeName       String     //CHAPTER, UNIT, HW
+  chapterUnit    String     //1,1-1,1-2...
+  title          String
+  content        String?
+  attachmentUrl  String?    //附件url
   vedioUrl       String?
   remark         String?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime?        @updatedAt
 
-  @@id([courseId, chapterName, unitName])
+  @@id([courseId, chapterUnit])
 }
 
+// 一對一課程預約紀錄
 model OneToOneCourseReservation {
   id             Int              @default(autoincrement()) @id
   courseId       Int
@@ -88,6 +125,7 @@ model OneToOneCourseReservation {
   endTime        DateTime?
 }
 
+// 課程公共討論區
 model CourseComment {
   id             Int              @default(autoincrement()) @id
   courseId       Int
@@ -101,6 +139,7 @@ model CourseComment {
   updatedAt      DateTime?        @updatedAt
 }
 
+// 討論區回覆
 model CourseCommentReply {
   id             Int              @default(autoincrement()) @id
   commentId      CourseComment    @relation(fields: [id], references: [id])

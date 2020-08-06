@@ -7,6 +7,18 @@ datasource mysql {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id             Int              @default(autoincrement()) @id
+  name           String           @unique   //SUPERADMIN, ADMIN(TEACHER), USER(STUDENT)
+  permissionIds  String?          //權限：以,分割permissionId
+}
+
+model Permission {
+  id             Int              @default(autoincrement()) @id
+  name           String           @unique
+  remark         String?
+}
+
 model User {
   id             Int              @default(autoincrement()) @id
   email          String           @unique
@@ -19,12 +31,25 @@ model User {
   birthday       DateTime?
   photo          String?
   gender         Gender?
-  role           Role             @default(USER)
   password       String
+  purchaseCourseIds String?         //購買課程：以,分割courseId
   createdAt      DateTime         @default(now())
   updatedAt      DateTime?        @updatedAt
   facebookId     String?
   googleId       String?
+  roleId         Int
+  role           Role             @relation(fields: [roleId], references: [id])
+}
+
+model LearningHistory {
+  userId         Int
+  user           User             @relation(fields: [userId], references: [id])
+  courseId       Int
+  course         Course           @relation(fields: [courseId], references: [id])
+  time           Int    //已觀看時間
+  note           String   //重點筆記
+
+  @@id([userId, courseId])
 }
 
 model Course {
@@ -34,23 +59,23 @@ model Course {
   price          Int
   specialPrice   Int?
   vedioUrl       String?
+  totalTime      Int?   //系統化課程總時間
   remark         String?
   publishTime    DateTime?
 }
 
 model SystematicCourse {
-  chapter        Int
-  unit           Int
-  title          String
-  content        String
+  courseId       Int
+  course         Course           @relation(fields: [courseId], references: [id])
+  chapterName    String
+  unitName       String
+  unitContent    String
   vedioUrl       String?
   remark         String?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime?        @updatedAt
-  courseId       Int
-  course         Course           @relation(fields: [courseId], references: [id])
 
-  @@id([courseId, unit, chapter])
+  @@id([courseId, chapterName, unitName])
 }
 
 model OneToOneCourseReservation {
@@ -67,6 +92,8 @@ model CourseComment {
   id             Int              @default(autoincrement()) @id
   courseId       Int
   course         Course           @relation(fields: [courseId], references: [id])
+  chapterName    String
+  unitName       String
   userId         Int
   author         User             @relation(fields: [userId], references: [id])
   content        String
@@ -88,11 +115,4 @@ enum Gender {
   MALE
   FEMALE
   TRANSGENDER
-}
-
-enum Role {
-  SUPERADMIN
-  ADMIN
-  TEACHER
-  USER
 }

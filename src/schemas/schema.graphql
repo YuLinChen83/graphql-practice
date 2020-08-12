@@ -109,7 +109,7 @@ input CourseCreateInput {
   title: String!
   content: String!
   vedioUrl: String
-  teachers: [User!]
+  # teachers: [User!]
   remark: String
   price: Int
   specialPrice: Int

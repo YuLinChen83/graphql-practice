@@ -1,5 +1,3 @@
-const { makeExecutableSchema } = require('graphql-tools');
-// const { importSchema } = require('graphql-import');
 const path = require('path');
 const { loadSchemaSync } = require('@graphql-tools/load');
 const { GraphQLFileLoader } = require('@graphql-tools/graphql-file-loader');
@@ -10,19 +8,10 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-core');
 const { combineResolvers, skip } = require('graphql-resolvers');
-const { sendEmail } = require('./utils/email');
 
-// const typeDefs = importSchema('src/schemas/schema.graphql');
 const schema = loadSchemaSync(path.join(__dirname, 'schemas/schema.graphql'), {
   loaders: [new GraphQLFileLoader()],
 });
-
-const getWhereObject = search => {
-  Object.keys(search).forEach(key => {
-    search[key] = { contains: search[key] };
-  });
-  return search;
-};
 
 const createTokens = user => {
   const refreshToken = jwt.sign(
@@ -66,9 +55,8 @@ const resolvers = {
     },
     users: combineResolvers(
       isAuthenticated,
-      async (parent, { filter, skip, take, orderBy }, { prisma }) => {
-        return await prisma.user.findMany({ where: filter || {}, skip, take, orderBy });
-      },
+      async (parent, { filter, skip, take, orderBy }, { prisma }) =>
+        await prisma.user.findMany({ where: filter || {}, skip, take, orderBy }),
     ),
     signIn: async (parent, { email, password }, { prisma, response, request }) => {
       const user = await prisma.user.findOne({ where: { email } });
@@ -78,59 +66,81 @@ const resolvers = {
       const { accessToken, refreshToken } = createTokens(user);
       response.cookie('refreshToken', refreshToken, { httpOnly: true });
       response.cookie('accessToken', accessToken, { httpOnly: true });
-      console.log(user);
-      return true;
+      return user;
     },
-    // course: (root, { name }) => {
-    //   console.log('Course:', name);
-    // },
+    course: async (parent, { courseId }, { prisma }) =>
+      await prisma.course.findOne({ where: { id: courseId }, include: { teacher: true } }),
+    courses: async (parent, { filter, skip, take, orderBy }, { prisma }) => {
+      return await prisma.course.findMany({
+        where: filter || {},
+        skip,
+        take,
+        orderBy,
+        include: { teacher: true },
+      });
+    },
   },
   Mutation: {
     signUp: async (parent, { data }, { prisma }) => {
-      const checkMap = { email: data.email, facebookID: data.facebookID, googleID: data.googleID };
-      if (
-        (
-          await prisma.user.findMany({
-            where: getWhereObject(checkMap),
-          })
-        ).length > 0
-      ) {
+      if (!!(await prisma.user.findOne({ where: { email: data.email } }))) {
         throw new UserInputError('已註冊，請直接登入');
       }
       data.password = bcrypt.hashSync(data.password, 12);
-      return await prisma.user.create({ data });
+      return await prisma.user.create({
+        data: {
+          ...data,
+          roleId: undefined,
+          role: {
+            connect: { id: data.roleId },
+          },
+        },
+        include: { role: true },
+      });
     },
-    createCourse: async (parent, { data }, { prisma }) => {
-      const newCourse = await prisma.course.create({ data });
-      return newCourse;
+    updateUser: async (parent, { userId, data }, { prisma }) => {
+      return await prisma.user.update({
+        where: { id: userId },
+        data,
+        include: { role: true },
+      });
     },
-    createSystematicCourse: async (parent, { data }, { prisma }) => {
-      const newCourse = await prisma.systematicCourse.create({
+    deleteUser: async (parent, { userId }, { prisma }, info) => {
+      await prisma.user.delete({ where: { id: userId } });
+      return true;
+    },
+    createCourse: async (parent, { data }, { prisma }) =>
+      await prisma.course.create({
+        data: {
+          ...data,
+          teacherId: undefined,
+          teacher: {
+            connect: { id: data.teacherId },
+          },
+        },
+      }),
+    updateCourse: async (parent, { courseId, data }, { prisma }) =>
+      await prisma.course.update({
+        where: { id: courseId },
+        data,
+        include: { teacher: true },
+      }),
+    addCourseNoticeboard: async (parent, { courseId, data }, { prisma }) => {
+      const course = await prisma.course.findOne({ where: { id: courseId } });
+      if (!course) {
+        throw new AuthenticationError('課程主檔不存在');
+      }
+      return await prisma.courseNoticeboard.create({
         data: {
           ...data,
           courseId: undefined,
           course: {
-            connect: { id: data.courseId },
+            connect: { id: courseId },
           },
         },
+        include: { course: true },
       });
-      return newCourse;
     },
   },
-  // Course: {
-  //   __resolveType (obj, context, info) {
-  //     console.log(obj);
-  //     // obj 為該 field 得到的資料
-  //     if (obj.vedioUrl) {
-  //       // 回傳相對應得 Object type 名稱
-  //       return 'SystematicCourse';
-  //     }
-  //     if (obj.reservations) {
-  //       return 'OneToOneCourse';
-  //     }
-  //     return null;
-  //   },
-  // },
 };
 
 const schemaWithResolvers = addResolversToSchema({

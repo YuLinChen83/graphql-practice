@@ -7,151 +7,98 @@ datasource mysql {
   url      = env("DATABASE_URL")
 }
 
-// 定義角色&其擁有權限
 model Role {
   id             Int              @default(autoincrement()) @id
-  name           String           @unique   //SUPERADMIN, ADMIN(TEACHER), USER(STUDENT)
-  permissionIds  String?          //權限：以,分割permissionId
+  code           String           @unique
+  text           String
+  permissionIds  String?          @map(name: "permission_ids")
+
+  @@map(name: "role")
 }
 
-// 定義行為操作權限
 model Permission {
   id             Int              @default(autoincrement()) @id
   name           String           @unique
   remark         String?
+  @@map(name: "permission")
 }
 
-// 使用者(roleId區分SuperAdmin/Teacher/Student)
 model User {
   id             Int              @default(autoincrement()) @id
   email          String           @unique
-  lastName       String
-  firstName       String
-  nickName       String
-  website        String?
+  password       String
+  lastName       String           @map(name: "last_name")
+  firstName       String           @map(name: "first_name")
+  nickName       String           @map(name: "nick_name")
+  birthday       DateTime?
+  headThumb      String?          @map(name: "head_thumb")
+  desc           String?
+  roleId         Int              @map(name: "role_id")
+  role           Role             @relation(fields: [roleId], references: [id])
   notified        Boolean          @default(false)
   activated      Boolean          @default(false)
-  birthday       DateTime?
-  photo          String?
-  gender         Gender?
-  password       String
-  courseIds      String?         //購買課程：以,分割courseId
-  orderIds       String?         //訂單記錄：以,分割orderIds
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime?        @updatedAt
-  facebookId     String?
-  googleId       String?
-  roleId         Int
-  role           Role             @relation(fields: [roleId], references: [id])
+  facebookId     String?          @map(name: "facebook_id")
+  googleId       String?          @map(name: "google_id")
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+  courses        Course[]
+
+  @@map(name: "user")
 }
 
-// 所有訂單列表(後台為主)
-model Order {
-  id             Int              @default(autoincrement()) @id
-  courseId       Int
-  course         Course           @relation(fields: [courseId], references: [id])
-  userId         Int
-  user           User             @relation(fields: [userId], references: [id])
-  purchaseTime   DateTime         @default(now())
-  status         String           @default("待付款")  //待確認,待發貨,待收貨,已取消,已退款
-  salesAttributedTo Int?    //業績歸屬?(可以認領)
-  paymentType    String           @default("Paypel") //
-  remark         String?
-}
-
-// 學習紀錄
-model LearningHistory {
-  userId         Int
-  user           User             @relation(fields: [userId], references: [id])
-  courseId       Int
-  course         Course           @relation(fields: [courseId], references: [id])
-  time           Int      //已觀看時間
-  note           String   //重點筆記
-  isComplete     Boolean  //是否完成
-
-  @@id([userId, courseId])
-}
-
-// 課程總檔
 model Course {
   id             Int              @default(autoincrement()) @id
-  typeCode       String           @default("SYS") //SYS:系統化, OTO: 一對一, OL:線上(後台收入類型用)
   title          String
-  content        String
+  desc           String?
+  details        String?
   price          Int
-  specialPrice   Int?
-  vedioUrl       String?
-  totalTime      Int?   //系統化課程總時間
-  remark         String?
-  publishTime    DateTime?
-  teacherIds     String?    //多老師則,分隔userId
+  specialPrice   Int?             @map(name: "special_price")
+  thumb          String?
+  vedioUrl       String?          @map(name: "vedio_url")
+  totalTime      Int              @map(name: "total_time")  @default(0)
+  courseType     String
+  teacherId      Int              @map(name: "teacher_id")
+  teacher        User             @relation(fields: [teacherId], references: [id])
+
+  @@map(name: "course")
+  @@unique([title, teacherId])
 }
 
-// 課程公告
-model CourseAnnoucement {
+model CourseNoticeboard {
   id             Int              @default(autoincrement()) @id
-  courseId       Int
+  courseId       Int              @map(name: "course_id")
   course         Course           @relation(fields: [courseId], references: [id])
   title          String
-  content        String?
-  createdAt      DateTime         @default(now())
+  desc           String?
+  thumb          String?
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+
+  @@map(name: "course_noticeboard")
 }
 
-// 系統化課程
-model SystematicCourse {
-  courseId       Int
-  course         Course           @relation(fields: [courseId], references: [id])
-  typeName       String     //CHAPTER, UNIT, HW
-  chapterUnit    String     //1,1-1,1-2...
-  title          String
-  content        String?
-  attachmentUrl  String?    //附件url
-  vedioUrl       String?
-  remark         String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime?        @updatedAt
-
-  @@id([courseId, chapterUnit])
-}
-
-// 一對一課程預約紀錄
-model OneToOneCourseReservation {
+model CourseDiscussion {
   id             Int              @default(autoincrement()) @id
-  courseId       Int
+  courseId       Int              @map(name: "course_id")
   course         Course           @relation(fields: [courseId], references: [id])
-  userId         Int
+  details        String?
+  userId         Int              @map(name: "user_id")
   user           User             @relation(fields: [userId], references: [id])
-  startTime      DateTime?
-  endTime        DateTime?
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+  
+  @@map(name: "course_discussion")
 }
 
-// 課程公共討論區
-model CourseComment {
+model CourseDiscussionReply {
   id             Int              @default(autoincrement()) @id
-  courseId       Int
-  course         Course           @relation(fields: [courseId], references: [id])
-  chapterName    String
-  unitName       String
-  userId         Int
-  author         User             @relation(fields: [userId], references: [id])
-  content        String
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime?        @updatedAt
-}
-
-// 討論區回覆
-model CourseCommentReply {
-  id             Int              @default(autoincrement()) @id
-  commentId      CourseComment    @relation(fields: [id], references: [id])
-  userId         Int
-  author         User             @relation(fields: [userId], references: [id])
-  content        String
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime?        @updatedAt
-}
-
-enum Gender {
-  MALE
-  FEMALE
-  TRANSGENDER
+  discussionId   Int              @map(name: "discussion_id")
+  discussion     CourseDiscussion @relation(fields: [discussionId], references: [id])
+  details        String?
+  userId         Int              @map(name: "user_id")
+  user           User             @relation(fields: [userId], references: [id])
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+  
+  @@map(name: "course_discussion_reply")
 }

@@ -1,17 +1,10 @@
 const path = require('path');
-const { loadSchemaSync } = require('@graphql-tools/load');
-const { GraphQLFileLoader } = require('@graphql-tools/graphql-file-loader');
-const { addResolversToSchema } = require('@graphql-tools/schema');
 const { DateTimeResolver, DateResolver } = require('graphql-scalars');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { AuthenticationError, ForbiddenError, UserInputError } = require('apollo-server-core');
 const { combineResolvers, skip } = require('graphql-resolvers');
-
-const schema = loadSchemaSync(path.join(__dirname, 'schemas/schema.graphql'), {
-  loaders: [new GraphQLFileLoader()],
-});
 
 const createTokens = user => {
   const refreshToken = jwt.sign(
@@ -143,11 +136,6 @@ const resolvers = {
   },
 };
 
-const schemaWithResolvers = addResolversToSchema({
-  schema,
-  resolvers,
-});
-
 module.exports = {
-  schema: schemaWithResolvers,
+  resolvers
 };

@@ -1,33 +1,36 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
-
 const prisma = new PrismaClient();
 
-module.exports = {
-  createContext: async req => {
-    const { request } = req;
-    const { accessToken, refreshToken } = request.cookies || {};
-    if (!accessToken && !refreshToken) {
-      return {
-        ...req,
-        prisma,
-      };
-    }
-    let decoded = await jwt.decode(accessToken, process.env.ACCESS_TOKEN_SECRET);
-    if (!decoded) {
-      if (!refreshToken) {
-        return {
-          ...req,
-          prisma,
-        };
+const parseCookie = (str = '') =>
+  str
+    ? str
+        .split(';')
+        .map(v => v.split('='))
+        .reduce((acc, v) => {
+          acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+          return acc;
+        }, {})
+    : {};
+
+async function createContext ({ req, res }) {
+  const context = {
+    request: req,
+    response: res,
+    prisma,
+  };
+  const { accessToken = '', refreshToken = '' } = parseCookie(req.headers.cookie);
+  if (accessToken) {
+    let decoded = await jwt.decode(accessToken.trim(), process.env.ACCESS_TOKEN_SECRET);
+    if (decoded) {
+      if (refreshToken) {
+        context.currentUser = decoded;
       }
-      decoded = await jwt.decode(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     }
-    return {
-      ...req,
-      currentUser: decoded || null,
-      prisma,
-      host: request.get('host'),
-    };
-  },
+  }
+  return context;
+}
+
+module.exports = {
+  createContext,
 };

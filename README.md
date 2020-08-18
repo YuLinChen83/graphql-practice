@@ -10,3 +10,5 @@
    2. `npx prisma migrate up --experimental`
 1. Update Prisma `npx prisma generate`
 1. `npm run dev`
+1. 起 docker `docker-compose up -d`；`docker ps` 看所有 docker
+1. `npx prisma studio --experimental` 開漂亮的 prisma admin (可以替代 phpmyadmin)

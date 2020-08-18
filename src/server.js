@@ -1,22 +1,10 @@
-const { GraphQLServer } = require('graphql-yoga');
-const { schema } = require('./schema');
-const { createContext } = require('./context');
-const { PrismaClient } = require('@prisma/client');
-const cookieParser = require('cookie-parser');
+const { ApolloServer } = require('apollo-server');
 const dotenv = require('dotenv/config');
+const { createContext } = require('./context');
+const { typeDefs } = require('./typeDefs');
+const { resolvers } = require('./resolvers');
 
-const server = new GraphQLServer({
-  schema,
-  context: createContext,
-});
-const serverOptions = {
-  port: process.env.PORT,
-  cors: {
-    credentials: true,
-    origin: process.env.FRONTEND_URL,
-  },
-};
-server.express.use(cookieParser());
-server.start(serverOptions, postStart => {
-  console.log(`🚀 Server ready at: http://localhost:${postStart.port}`);
+const server = new ApolloServer({ typeDefs, resolvers, context: createContext });
+server.listen({ port: 4400 }).then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
 });

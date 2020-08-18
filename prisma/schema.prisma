@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource mysql {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id             Int              @default(autoincrement()) @id
+  code           String           @unique
+  text           String
+  permissionIds  String?          @map(name: "permission_ids")
+
+  @@map(name: "role")
+}
+
+model Permission {
+  id             Int              @default(autoincrement()) @id
+  name           String           @unique
+  remark         String?
+  @@map(name: "permission")
+}
+
+model User {
+  id             Int              @default(autoincrement()) @id
+  email          String           @unique
+  password       String
+  lastName       String           @map(name: "last_name")
+  firstName       String           @map(name: "first_name")
+  nickName       String           @map(name: "nick_name")
+  birthday       DateTime?
+  headThumb      String?          @map(name: "head_thumb")
+  desc           String?
+  roleId         Int              @map(name: "role_id")
+  role           Role             @relation(fields: [roleId], references: [id])
+  notified        Boolean          @default(false)
+  activated      Boolean          @default(false)
+  facebookId     String?          @map(name: "facebook_id")
+  googleId       String?          @map(name: "google_id")
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+  courses        Course[]
+
+  @@map(name: "user")
+}
+
+model Course {
+  id             Int              @default(autoincrement()) @id
+  title          String
+  desc           String?
+  details        String?
+  price          Int
+  specialPrice   Int?             @map(name: "special_price")
+  thumb          String?
+  vedioUrl       String?          @map(name: "vedio_url")
+  totalTime      Int              @map(name: "total_time")  @default(0)
+  courseType     String
+  teacherId      Int              @map(name: "teacher_id")
+  teacher        User             @relation(fields: [teacherId], references: [id])
+
+  @@map(name: "course")
+  @@unique([title, teacherId])
+}
+
+model CourseNoticeboard {
+  id             Int              @default(autoincrement()) @id
+  courseId       Int              @map(name: "course_id")
+  course         Course           @relation(fields: [courseId], references: [id])
+  title          String
+  desc           String?
+  thumb          String?
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+
+  @@map(name: "course_noticeboard")
+}
+
+model CourseDiscussion {
+  id             Int              @default(autoincrement()) @id
+  courseId       Int              @map(name: "course_id")
+  course         Course           @relation(fields: [courseId], references: [id])
+  details        String?
+  userId         Int              @map(name: "user_id")
+  user           User             @relation(fields: [userId], references: [id])
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+  
+  @@map(name: "course_discussion")
+}
+
+model CourseDiscussionReply {
+  id             Int              @default(autoincrement()) @id
+  discussionId   Int              @map(name: "discussion_id")
+  discussion     CourseDiscussion @relation(fields: [discussionId], references: [id])
+  details        String?
+  userId         Int              @map(name: "user_id")
+  user           User             @relation(fields: [userId], references: [id])
+  createdAt      DateTime         @map(name: "created_at")  @default(now())
+  updatedAt      DateTime?        @map(name: "updated_at")  @updatedAt
+  
+  @@map(name: "course_discussion_reply")
+}
